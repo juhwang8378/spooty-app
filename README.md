@@ -89,6 +89,7 @@ Spooty can also be built from source.
 - Node v18.19.1 (it is recommended to use `nvm` node version manager to install proper version of node)
 - Ffmpeg
 - Python3
+Tip: use `nvm` (or your preferred Node version manager) to match `.nvmrc`. Local Node bundles such as `.node` or `.tools` are for personal use and should not be committed.
 
 #### Process
 - install Node v18.19.1 using `nvm install` and use that node version `nvm use`
