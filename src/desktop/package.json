@@ -13,7 +13,8 @@
   "devDependencies": {
     "@electron/rebuild": "^3.6.0",
     "electron": "31.2.0",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "extract-zip": "^2.0.1"
   },
   "build": {
     "appId": "com.spooty.app",
