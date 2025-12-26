@@ -23,6 +23,14 @@ jobs:
 
       - name: Install dependencies
         run: npm install --include=dev --no-package-lock --legacy-peer-deps
+      
+      - name: Ensure 7zip-bin exists
+        shell: pwsh
+        run: |
+          $sevenZip = "node_modules/7zip-bin/win/x64/7za.exe"
+          if (!(Test-Path $sevenZip)) {
+            npm install --no-save --legacy-peer-deps 7zip-bin
+          }
 
       - name: Download yt-dlp binaries
         run: npm run deps:download
