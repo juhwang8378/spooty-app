@@ -9,9 +9,8 @@ import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { EnvironmentEnum } from '../environmentEnum';
 import { UtilsService } from '../shared/utils.service';
-import { Queue } from 'bullmq';
-import { InjectQueue } from '@nestjs/bullmq';
 import { YoutubeService } from '../shared/youtube.service';
+import { TrackQueueService } from './track-queue.service';
 
 enum WsTrackOperation {
   New = 'trackNew',
@@ -28,8 +27,7 @@ export class TrackService {
   constructor(
     @InjectRepository(TrackEntity)
     private repository: Repository<TrackEntity>,
-    @InjectQueue('track-download-processor') private trackDownloadQueue: Queue,
-    @InjectQueue('track-search-processor') private trackSearchQueue: Queue,
+    private readonly trackQueue: TrackQueueService,
     private readonly configService: ConfigService,
     private readonly utilsService: UtilsService,
     private readonly youtubeService: YoutubeService,
@@ -57,9 +55,9 @@ export class TrackService {
 
   async create(track: TrackEntity, playlist?: PlaylistEntity): Promise<void> {
     const savedTrack = await this.repository.save({ ...track, playlist });
-    await this.trackSearchQueue.add('', savedTrack, {
-      jobId: `id-${savedTrack.id}`,
-    });
+    this.trackQueue.enqueueSearch(savedTrack, () =>
+      this.findOnYoutube(savedTrack),
+    );
     this.io.emit(WsTrackOperation.New, {
       track: savedTrack,
       playlistId: playlist.id,
@@ -73,8 +71,10 @@ export class TrackService {
 
   async retry(id: number): Promise<void> {
     const track = await this.get(id);
-    await this.trackSearchQueue.add('', track, { jobId: `id-${id}` });
-    await this.update(id, { ...track, status: TrackStatusEnum.New });
+    if (track) {
+      this.trackQueue.enqueueSearch(track, () => this.findOnYoutube(track));
+      await this.update(id, { ...track, status: TrackStatusEnum.New });
+    }
   }
 
   async findOnYoutube(track: TrackEntity): Promise<void> {
@@ -100,9 +100,9 @@ export class TrackService {
         status: TrackStatusEnum.Error,
       };
     }
-    await this.trackDownloadQueue.add('', updatedTrack, {
-      jobId: `id-${updatedTrack.id}`,
-    });
+    this.trackQueue.enqueueDownload(updatedTrack, () =>
+      this.downloadFromYoutube(updatedTrack),
+    );
     await this.update(track.id, updatedTrack);
   }
 

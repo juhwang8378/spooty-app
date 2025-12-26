@@ -4,6 +4,7 @@ import {TrackListComponent} from "../track-list/track-list.component";
 import {PlaylistService, PlaylistStatusEnum, PlaylistUi} from "../../services/playlist.service";
 import {Observable, map} from "rxjs";
 import {Playlist} from "../../models/playlist";
+import {I18nService} from "../../services/i18n.service";
 
 const STATUS2CLASS = {
   [PlaylistStatusEnum.Completed]: 'is-success',
@@ -43,7 +44,7 @@ export class PlaylistBoxComponent {
   trackCompletedCount$!: Observable<number>;
   statusClass$!: Observable<string>;
 
-  constructor(private readonly service: PlaylistService) { }
+  constructor(private readonly service: PlaylistService, public readonly i18n: I18nService) { }
 
   toggleCollapse(playlistId: number): void {
     this.service.toggleCollapsed(playlistId);

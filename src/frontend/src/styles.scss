@@ -3,12 +3,149 @@
 @import "@fortawesome/fontawesome-free/css/all.css";
 
 :root {
-  --bulma-primary-h: 141deg;
-  --bulma-primary-s: 73%;
-  --bulma-primary-l: 42%;
+  --bulma-primary-h: 174deg;
+  --bulma-primary-s: 78%;
+  --bulma-primary-l: 38%;
+  --bulma-link-h: 174deg;
+  --bulma-link-s: 78%;
+  --bulma-link-l: 38%;
+
+  --spooty-font: "Space Grotesk", "Avenir Next", "Gill Sans", "Trebuchet MS", sans-serif;
+  --spooty-bg: #f8f4ef;
+  --spooty-ink: #14181f;
+  --spooty-muted: #2f3642;
+  --spooty-card: rgba(255, 255, 255, 0.85);
+  --spooty-card-border: rgba(15, 23, 42, 0.08);
+  --spooty-shadow: 0 18px 45px rgba(15, 23, 42, 0.14), 0 4px 12px rgba(15, 23, 42, 0.08);
+  --spooty-shadow-soft: 0 8px 20px rgba(15, 23, 42, 0.1), 0 2px 6px rgba(15, 23, 42, 0.08);
+  --spooty-primary: #0ea5a3;
+  --spooty-primary-strong: #0f766e;
+  --spooty-accent: #f97316;
 }
 
 body {
   padding: 0;
   margin: 0;
+  min-height: 100vh;
+  color: var(--spooty-ink);
+  font-family: var(--spooty-font);
+  background-color: var(--spooty-bg);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(14, 165, 163, 0.2), transparent 48%),
+    radial-gradient(circle at 88% 14%, rgba(249, 115, 22, 0.18), transparent 45%),
+    radial-gradient(circle at 70% 85%, rgba(56, 189, 248, 0.16), transparent 48%),
+    linear-gradient(160deg, #fff6e9 0%, #f8f4ef 48%, #f2f7f6 100%);
+  background-attachment: fixed;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--spooty-primary);
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--spooty-primary-strong);
+}
+
+.box {
+  background: var(--spooty-card);
+  border: 1px solid var(--spooty-card-border);
+  border-radius: 18px;
+  box-shadow: var(--spooty-shadow);
+  backdrop-filter: blur(12px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.box:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--spooty-shadow-soft);
+}
+
+.button {
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button.is-primary {
+  border: none;
+  background-image: linear-gradient(135deg, var(--spooty-primary) 0%, #22c55e 55%, var(--spooty-accent) 100%);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+}
+
+.button.is-primary:hover {
+  filter: brightness(1.05);
+}
+
+.button.is-light {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--spooty-card-border);
+}
+
+.input,
+.textarea,
+.select select {
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus,
+.textarea:focus,
+.select select:focus {
+  border-color: var(--spooty-primary);
+  box-shadow: 0 0 0 3px rgba(14, 165, 163, 0.18);
+}
+
+.tag {
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.title {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.subtitle {
+  color: var(--spooty-muted);
+}
+
+.help {
+  color: var(--spooty-muted);
+}
+
+.label,
+.control label {
+  color: var(--spooty-muted);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: #5b6474;
+  opacity: 1;
+}
+
+hr {
+  height: 1px;
+  border: none;
+  background-image: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.18), transparent);
+  margin: 1.5rem 0;
+}
+
+::selection {
+  background: rgba(14, 165, 163, 0.25);
 }

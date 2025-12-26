@@ -8,9 +8,9 @@ import { TrackEntity } from './track/track.entity';
 import { TrackModule } from './track/track.module';
 import { PlaylistModule } from './playlist/playlist.module';
 import { PlaylistEntity } from './playlist/playlist.entity';
-import { resolve } from 'path';
 import { EnvironmentEnum } from './environmentEnum';
-import { BullModule } from '@nestjs/bullmq';
+import { resolveFromBase } from './shared/path-resolver';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -18,45 +18,39 @@ import { BullModule } from '@nestjs/bullmq';
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService) => {
+        const baseDir = process.env.SPOOTY_BASE_DIR || __dirname;
+        return {
         type: 'sqlite',
-        database: resolve(
-          __dirname,
+        database: resolveFromBase(
           configService.get<string>(EnvironmentEnum.DB_PATH),
+          baseDir,
         ),
         entities: [TrackEntity, PlaylistEntity],
         synchronize: true,
-      }),
+        };
+      },
       inject: [ConfigService],
     }),
     ServeStaticModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => [
-        {
-          rootPath: resolve(
-            __dirname,
-            configService.get<string>(EnvironmentEnum.FE_PATH),
-          ),
-          exclude: ['/api/(.*)'],
-        },
-      ],
-      inject: [ConfigService],
-    }),
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        defaultJobOptions: {
-          removeOnComplete: true,
-        },
-        connection: {
-          host: configService.get<string>(EnvironmentEnum.REDIS_HOST),
-          port: configService.get<number>(EnvironmentEnum.REDIS_PORT),
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const baseDir = process.env.SPOOTY_BASE_DIR || __dirname;
+        return [
+          {
+            rootPath: resolveFromBase(
+              configService.get<string>(EnvironmentEnum.FE_PATH),
+              baseDir,
+            ),
+            exclude: ['/api/(.*)'],
+          },
+        ];
+      },
       inject: [ConfigService],
     }),
     TrackModule,
     PlaylistModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [],

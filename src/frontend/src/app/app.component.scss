@@ -1,0 +1,147 @@
+.is-clickable {
+  cursor: pointer;
+}
+
+.margin-top {
+  margin-top: 0.75rem;
+}
+
+.app-hero {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 2.5rem;
+  position: relative;
+  z-index: 1;
+  animation: hero-in 0.7s ease both;
+}
+
+.app-shell {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hero.is-primary {
+  border-bottom-left-radius: 28px;
+  border-bottom-right-radius: 28px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
+}
+
+.hero.is-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.25), transparent 55%),
+    radial-gradient(circle at 90% 10%, rgba(249, 115, 22, 0.25), transparent 50%),
+    linear-gradient(135deg, rgba(14, 165, 163, 0.85), rgba(34, 197, 94, 0.75) 45%, rgba(249, 115, 22, 0.8) 100%);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.hero.is-primary .title,
+.hero.is-primary .subtitle,
+.hero.is-primary .tag {
+  color: #fff;
+}
+
+.hero.is-primary .title {
+  letter-spacing: -0.02em;
+}
+
+.hero.is-primary .tag {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+}
+
+.buttons.has-addons {
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.download-row {
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.download-row .input {
+  flex: 1;
+}
+
+.instructions-body {
+  padding: 0.5rem 0.25rem 0.25rem;
+  color: #1f2937;
+}
+
+.instructions-body .help {
+  color: #1f2937;
+}
+
+.license-text {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px dashed rgba(15, 23, 42, 0.2);
+  border-radius: 12px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  padding: 0.9rem 1rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.app-shell > .box {
+  animation: rise-in 0.6s ease both;
+}
+
+.app-shell > .box:nth-of-type(1) { animation-delay: 0.04s; }
+.app-shell > .box:nth-of-type(2) { animation-delay: 0.08s; }
+.app-shell > .box:nth-of-type(3) { animation-delay: 0.12s; }
+.app-shell > .box:nth-of-type(4) { animation-delay: 0.16s; }
+.app-shell > .box:nth-of-type(5) { animation-delay: 0.2s; }
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .app-hero {
+    padding: 2.5rem 1.25rem 2rem;
+  }
+
+  .app-shell {
+    padding: 1.5rem 1.25rem 3rem;
+  }
+
+  .download-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .download-row .button {
+    width: 100%;
+  }
+}

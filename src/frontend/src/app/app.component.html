@@ -1,45 +1,151 @@
 <section class="hero is-primary">
-  <div class="hero-body">
-    <p class="title">
-      <i class="fa-brands fa-spotify"></i>
-      <span>Spooty</span>
-      <span class="tag is-dark is-size-7">v{{version}}</span>
-    </p>
-    <p class="subtitle">Self-hosted spotify downloader</p>
+  <div class="hero-body app-hero">
+    <div class="is-flex is-justify-content-space-between is-align-items-center is-flex-wrap-wrap">
+      <div>
+        <p class="title">
+          <i class="fa-brands fa-spotify"></i>
+          <span>Spooty</span>
+          <span class="tag is-dark is-size-7">v{{version}}</span>
+        </p>
+        <p class="subtitle">{{ i18n.t('appSubtitle') }}</p>
+      </div>
+      <div class="buttons has-addons">
+        <button class="button is-small" [class.is-info]="i18n.lang === 'en'" (click)="setLanguage('en')">EN</button>
+        <button class="button is-small" [class.is-info]="i18n.lang === 'ko'" (click)="setLanguage('ko')">한국어</button>
+      </div>
+    </div>
   </div>
 </section>
 
 <section class="hero">
-  <div class="hero-body">
+  <div class="hero-body app-shell">
     <div class="box">
-      <p class="subtitle">Download</p>
-      <div class="is-flex">
-        <input class="input" type="text" [(ngModel)]="url" placeholder="Paste playlist/song/artist url"/>
+      <div class="is-flex is-justify-content-space-between is-align-items-center">
+        <p class="subtitle">{{ i18n.t('settingsTitle') }}</p>
+        <button class="button is-small is-light" (click)="toggleSettings()">
+          <i class="fa-solid" [class.fa-chevron-down]="!settingsOpen" [class.fa-chevron-up]="settingsOpen"></i>
+        </button>
+      </div>
+      <div *ngIf="settingsOpen">
+        <div class="field">
+          <label class="label">{{ i18n.t('settingsSpotifyClientIdLabel') }}</label>
+          <div class="control">
+            <input class="input" type="text" [(ngModel)]="settings.SPOTIFY_CLIENT_ID" [placeholder]="i18n.t('settingsSpotifyClientIdPlaceholder')" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">{{ i18n.t('settingsSpotifyClientSecretLabel') }}</label>
+          <div class="control has-icons-right">
+            <input class="input" [type]="showSecrets ? 'text' : 'password'" [(ngModel)]="settings.SPOTIFY_CLIENT_SECRET" [placeholder]="i18n.t('settingsSpotifyClientSecretPlaceholder')" />
+            <span class="icon is-small is-right is-clickable" (click)="showSecrets = !showSecrets" [title]="i18n.t('settingsToggleVisibility')">
+              <i class="fa-solid" [class.fa-eye]="!showSecrets" [class.fa-eye-slash]="showSecrets"></i>
+            </span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">{{ i18n.t('settingsDownloadsPathLabel') }}</label>
+          <div class="control">
+            <input class="input" type="text" [(ngModel)]="settings.DOWNLOADS_PATH" [placeholder]="i18n.t('settingsDownloadsPathPlaceholder')" />
+          </div>
+          <p class="help">{{ i18n.t('settingsDownloadsPathHelp') }}</p>
+        </div>
+        <div class="field">
+          <label class="label">{{ i18n.t('settingsFormatLabel') }}</label>
+          <div class="control">
+            <input class="input" type="text" [(ngModel)]="settings.FORMAT" [placeholder]="i18n.t('settingsFormatPlaceholder')" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">{{ i18n.t('settingsYtCookiesLabel') }}</label>
+          <div class="control has-icons-right">
+            <input class="input" [type]="showCookies ? 'text' : 'password'" [(ngModel)]="settings.YT_COOKIES" [placeholder]="i18n.t('settingsYtCookiesPlaceholder')" />
+            <span class="icon is-small is-right is-clickable" (click)="showCookies = !showCookies" [title]="i18n.t('settingsToggleVisibility')">
+              <i class="fa-solid" [class.fa-eye]="!showCookies" [class.fa-eye-slash]="showCookies"></i>
+            </span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">{{ i18n.t('settingsYtDownloadsLabel') }}</label>
+          <div class="control">
+            <input class="input" type="text" [(ngModel)]="settings.YT_DOWNLOADS_PER_MINUTE" [placeholder]="i18n.t('settingsYtDownloadsPlaceholder')" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">{{ i18n.t('settingsYtdlpPathLabel') }}</label>
+          <div class="control">
+            <input class="input" type="text" [(ngModel)]="settings.YTDLP_BINARY_PATH" [placeholder]="i18n.t('settingsYtdlpPathPlaceholder')" />
+          </div>
+        </div>
+        <div class="field is-grouped is-align-items-center">
+          <div class="control">
+            <button class="button is-primary" [class.is-loading]="settingsSaving" (click)="saveSettings()">{{ i18n.t('settingsSaveButton') }}</button>
+          </div>
+          <div class="control" *ngIf="settingsLoading">
+            <p class="help">{{ i18n.t('settingsLoading') }}</p>
+          </div>
+        </div>
+        <p class="help is-success" *ngIf="settingsMessageKey">{{ i18n.t(settingsMessageKey) }}</p>
+        <p class="help is-danger" *ngIf="settingsErrorKey">{{ i18n.t(settingsErrorKey) }}</p>
+      </div>
+    </div>
+    <div class="box">
+      <div class="is-flex is-justify-content-space-between is-align-items-center">
+        <p class="subtitle">{{ i18n.t('instructionsTitle') }}</p>
+        <button class="button is-small is-light" (click)="toggleInstructions()">
+          <i class="fa-solid" [class.fa-chevron-down]="!instructionsOpen" [class.fa-chevron-up]="instructionsOpen"></i>
+        </button>
+      </div>
+      <div *ngIf="instructionsOpen" class="instructions-body">
+        <p class="has-text-weight-semibold">{{ i18n.t('instructionsUsageTitle') }}</p>
+        <ol>
+          <li *ngFor="let step of i18n.tList('usageSteps')">{{ step }}</li>
+        </ol>
+        <p class="has-text-weight-semibold margin-top">{{ i18n.t('instructionsSpotifyTitle') }}</p>
+        <ol>
+          <li *ngFor="let step of i18n.tList('spotifySteps')">{{ step }}</li>
+        </ol>
+        <p class="help">{{ i18n.t('spotifyRedirectNote') }}</p>
+      </div>
+    </div>
+    <div class="box">
+      <p class="subtitle">{{ i18n.t('downloadTitle') }}</p>
+      <div class="is-flex download-row">
+        <input class="input" type="text" [(ngModel)]="url" [placeholder]="i18n.t('downloadPlaceholder')"/>
         <button class="button is-primary"
                 [class.is-loading]="(createLoading$ | async)?.isLoading"
                 (click)="download()"
                 [disabled]="!url"
         >
-          <i class="fa-solid fa-download"></i> Download
+          <i class="fa-solid fa-download"></i> {{ i18n.t('downloadButton') }}
         </button>
       </div>
     </div>
     <hr>
     <div class="box">
     <div class="is-flex is-justify-content-space-between">
-      <p class="subtitle">Playlists</p>
+      <p class="subtitle">{{ i18n.t('playlistsTitle') }}</p>
       <div class="buttons has-addons">
-        <button class="button is-outlined is-success" title="Remove completed from list" (click)="deleteCompleted()">
+        <button class="button is-outlined is-success" [title]="i18n.t('playlistsRemoveCompletedTitle')" (click)="deleteCompleted()">
           <i class="fa-solid fa-check"></i>
         </button>
-        <button class="button is-outlined is-danger" title="Remove failed from list" (click)="deleteFailed()">
+        <button class="button is-outlined is-danger" [title]="i18n.t('playlistsRemoveFailedTitle')" (click)="deleteFailed()">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
     </div>
       <app-playlist-box *ngFor="let playlist of playlists$ | async" [playlist]="playlist"></app-playlist-box>
     </div>
+    <div class="box">
+      <p class="subtitle">{{ i18n.t('aboutTitle') }}</p>
+      <pre class="license-text">MIT License
+
+Copyright (c) 2024 Filip Gulan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</pre>
+    </div>
   </div>
 </section>
-
-

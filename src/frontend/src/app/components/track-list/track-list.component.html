@@ -3,32 +3,32 @@
     <span>{{ track.artist }} - {{ track.name }}</span>&nbsp;
     <a [href]="track.spotifyUrl"
        target="_blank"
-       class="has-text-primary margin-left" title="Spotify preview of track that will be downloaded">
+       class="has-text-primary margin-left" [title]="i18n.t('trackSpotifyPreviewTitle')">
       <i class="fa-brands fa-spotify"></i>
     </a>&nbsp;
     <a [href]="track.youtubeUrl"
        target="_blank"
-       class="has-text-danger is-color-black" title="Youtube searched track that will be downloaded">
+       class="has-text-danger is-color-black" [title]="i18n.t('trackYoutubePreviewTitle')">
       <i class="fa-brands fa-youtube"></i>
     </a>&nbsp;
     <a *ngIf="track.status === trackStatuses.Completed"
        href="api/track/download/{{track.id}}"
        class="has-text-info"
-       title="Download downloaded and locally saved file"
+       [title]="i18n.t('trackDownloadTitle')"
        download>
       <i class="fa-solid fa-download"></i>
     </a>
   </div>
   <div>
-    <i *ngIf="track.status === trackStatuses.Error" class="fa-solid fa-repeat hover-icon" title="Retry to download" (click)="retry(track.id)"></i>&nbsp;
-    <i class="fa-solid fa-xmark hover-icon" title="Remove track from list" (click)="delete(track.id)"></i>&nbsp;
+    <i *ngIf="track.status === trackStatuses.Error" class="fa-solid fa-repeat hover-icon" [title]="i18n.t('trackRetryTitle')" (click)="retry(track.id)"></i>&nbsp;
+    <i class="fa-solid fa-xmark hover-icon" [title]="i18n.t('trackRemoveTitle')" (click)="delete(track.id)"></i>&nbsp;
     <ng-container [ngSwitch]="track.status">
-      <span *ngSwitchCase="trackStatuses.New" class="tag is-info">New</span>
-      <span *ngSwitchCase="trackStatuses.Searching" class="tag is-warning">Searching</span>
-      <span *ngSwitchCase="trackStatuses.Queued" class="tag is-warning">Queued</span>
-      <span *ngSwitchCase="trackStatuses.Downloading" class="tag is-warning">Downloading</span>
-      <span *ngSwitchCase="trackStatuses.Completed" class="tag is-success">Completed</span>
-      <span *ngSwitchCase="trackStatuses.Error" class="tag is-danger" [title]="track.error">Error</span>
+      <span *ngSwitchCase="trackStatuses.New" class="tag is-info">{{ i18n.t('trackStatusNew') }}</span>
+      <span *ngSwitchCase="trackStatuses.Searching" class="tag is-warning">{{ i18n.t('trackStatusSearching') }}</span>
+      <span *ngSwitchCase="trackStatuses.Queued" class="tag is-warning">{{ i18n.t('trackStatusQueued') }}</span>
+      <span *ngSwitchCase="trackStatuses.Downloading" class="tag is-warning">{{ i18n.t('trackStatusDownloading') }}</span>
+      <span *ngSwitchCase="trackStatuses.Completed" class="tag is-success">{{ i18n.t('trackStatusCompleted') }}</span>
+      <span *ngSwitchCase="trackStatuses.Error" class="tag is-danger" [title]="track.error">{{ i18n.t('trackStatusError') }}</span>
     </ng-container>
   </div>
 </a>

@@ -3,6 +3,7 @@ import {CommonModule, NgFor, NgSwitch, NgSwitchCase} from "@angular/common";
 import {TrackService} from "../../services/track.service";
 import {Observable} from "rxjs";
 import {Track, TrackStatusEnum} from "../../models/track";
+import {I18nService} from "../../services/i18n.service";
 
 @Component({
     selector: 'app-track-list',
@@ -21,6 +22,7 @@ export class TrackListComponent {
 
   constructor(
     private readonly service: TrackService,
+    public readonly i18n: I18nService,
   ) { }
 
   delete(id: number): void {

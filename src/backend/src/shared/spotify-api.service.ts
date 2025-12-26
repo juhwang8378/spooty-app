@@ -57,7 +57,7 @@ export class SpotifyApiService {
 
       if (!clientId || !clientSecret) {
         throw new Error(
-          'Missing Spotify credentials. Set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET in .env file',
+          'Missing Spotify credentials. Set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET in Settings or environment variables',
         );
       }
 

@@ -14,7 +14,6 @@ COPY --from=builder /spooty/src/backend/.env.docker ./.env
 RUN npm prune --production
 RUN rm -rf src package.json package-lock.json
 RUN apk add --no-cache ffmpeg
-RUN apk add --no-cache redis
 RUN apk add --no-cache python3 py3-pip
 EXPOSE 3000
 CMD ["node", "backend/main.js"]

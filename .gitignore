@@ -1,6 +1,42 @@
+# Dependencies
 /node_modules
+**/node_modules
+/venv
+**/__pycache__/
+*.py[cod]
+
+# Build outputs / packages
 /dist
+**/dist/
+/build
+**/build/
+/out
+**/out/
+/release
+**/release/
+*.dmg
+*.app
+
+# IDE / editors
 /.idea
-**/*.sqlite
+/.vscode
+**/.vscode
+
+# Environment files / secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
 # Local Netlify folder
 .netlify
+
+# Data files / OS cruft
+**/*.sqlite
+.DS_Store
+Thumbs.db
+
+/deps/bin/*
+!/deps/bin/.gitkeep
+/src/backend/AEC=*

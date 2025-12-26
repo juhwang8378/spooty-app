@@ -1,9 +1,33 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as fs from 'fs';
-import { resolve } from 'path';
-import { exec } from 'child_process';
 import { EnvironmentEnum } from './environmentEnum';
+import {
+  applyEffectiveSettingsToEnv,
+  getDefaultDbPath,
+} from './settings/settings.store';
+import { resolveFromBase } from './shared/path-resolver';
+import { join, delimiter } from 'path';
+
+process.env.SPOOTY_BASE_DIR = process.env.SPOOTY_BASE_DIR || __dirname;
+
+applyEffectiveSettingsToEnv();
+
+if (!process.env[EnvironmentEnum.DB_PATH]) {
+  process.env[EnvironmentEnum.DB_PATH] = getDefaultDbPath();
+}
+if (!process.env[EnvironmentEnum.FE_PATH]) {
+  process.env[EnvironmentEnum.FE_PATH] = '../frontend/browser';
+}
+
+const resourcesPath = process.env.SPOOTY_RESOURCES_PATH;
+if (resourcesPath) {
+  const depsBin = join(resourcesPath, 'deps', 'bin');
+  if (fs.existsSync(depsBin)) {
+    const currentPath = process.env.PATH || '';
+    process.env.PATH = `${depsBin}${delimiter}${currentPath}`;
+  }
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,20 +36,11 @@ async function bootstrap() {
 }
 bootstrap();
 
-if (!process.env[EnvironmentEnum.DOWNLOADS_PATH]) {
-  throw new Error('DOWNLOADS_PATH environment variable is missing');
-}
-const folderName = resolve(
-  __dirname,
+const baseDir = process.env.SPOOTY_BASE_DIR || __dirname;
+const downloadsPath = resolveFromBase(
   process.env[EnvironmentEnum.DOWNLOADS_PATH],
+  baseDir,
 );
-!fs.existsSync(folderName) && fs.mkdirSync(folderName);
-
-try {
-  // not good idea, but I want to keep simple Dockerfile, I know ideally should be in another container and used docker compose
-  Boolean(process.env[EnvironmentEnum.REDIS_RUN]) &&
-    exec(`redis-server --port ${process.env.REDIS_PORT}`);
-} catch (e) {
-  console.log('Unable to run redis server form app');
-  console.log(e);
+if (!fs.existsSync(downloadsPath)) {
+  fs.mkdirSync(downloadsPath, { recursive: true });
 }

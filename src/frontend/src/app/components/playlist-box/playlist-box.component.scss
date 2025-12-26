@@ -1,20 +1,75 @@
 .hover-icon {
-  display: none;
+  opacity: 0.35;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .panel-heading {
-  padding: 5px 10px;
-  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
 
   &:hover .hover-icon {
-    display: inline;
+    opacity: 1;
+    transform: translateY(-1px);
   }
 
   &:hover .hover-icon-reversed {
-    display: none;
+    opacity: 0;
   }
 }
 
+.hover-icon-reversed {
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+}
+
 .panel {
-  margin: 5px 0;
+  margin: 0.75rem 0;
+  border-radius: 16px;
+  border: 1px solid var(--spooty-card-border);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--spooty-shadow-soft);
+  overflow: hidden;
+}
+
+.panel.is-success {
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.panel.is-success .panel-heading {
+  background: linear-gradient(120deg, rgba(34, 197, 94, 0.18), rgba(14, 165, 163, 0.12));
+}
+
+.panel.is-info {
+  border-color: rgba(59, 130, 246, 0.32);
+}
+
+.panel.is-info .panel-heading {
+  background: linear-gradient(120deg, rgba(59, 130, 246, 0.18), rgba(125, 211, 252, 0.1));
+}
+
+.panel.is-warning {
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.panel.is-warning .panel-heading {
+  background: linear-gradient(120deg, rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.12));
+}
+
+.panel.is-danger {
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.panel.is-danger .panel-heading {
+  background: linear-gradient(120deg, rgba(239, 68, 68, 0.18), rgba(248, 113, 113, 0.12));
+}
+
+.panel.is-primary {
+  border-color: rgba(14, 165, 163, 0.35);
+}
+
+.panel.is-primary .panel-heading {
+  background: linear-gradient(120deg, rgba(14, 165, 163, 0.2), rgba(45, 212, 191, 0.12));
 }
