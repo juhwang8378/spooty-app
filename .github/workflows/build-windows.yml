@@ -22,7 +22,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --include=dev --no-package-lock
+        run: npm install --include=dev --no-package-lock --legacy-peer-deps
 
       - name: Download yt-dlp binaries
         run: npm run deps:download
