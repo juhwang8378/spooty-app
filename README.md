@@ -13,6 +13,24 @@ It can also subscribe to playlists and download new songs upon release.
 Spooty does not download audio from Spotify; it only uses Spotify for metadata and then finds and downloads matching music on YouTube.
 The project is based on NestJS and Angular.
 
+#### Windows 데스크톱 앱 안내 (한국어)
+1. **1단계: 설치 및 실행 권한 부여**
+   - 설치: 다운로드한 `.exe` 파일을 엽니다.
+   - 권한 해제: Windows에는 SmartScreen 경고가 있습니다. 설치 파일이 서명되지 않았거나 인지도가 낮으면 “Windows에서 PC를 보호했습니다”라는 창이 뜰 수 있습니다. 이 경우 추가 정보(More info) → 실행(Run anyway) 를 눌러 진행하면 됩니다. 또는 파일을 우클릭 → 속성(Properties) 에서 차단 해제(Unblock) 가 보이면 체크 후 실행하세요.
+   - 설치 마법사에서 다음 클릭, 설치 경로 확인/변경, 바탕화면/시작 메뉴 바로가기 선택, 설치 -> 완료
+   - 완료 후 Spooty 실행 체크하면 바로 실행됩니다.
+2. **2단계: Spotify API 연동 (최초 1회)**
+   - Spotify Developer Dashboard에 접속하여 로그인합니다.
+   - Create App을 클릭하여 새 앱을 만듭니다. (이름/설명은 자유)
+   - Redirect URI 항목에 `https://127.0.0.1:3000`을 입력하고 저장합니다.
+   - 만들어진 앱의 Settings에서 다음 정보를 복사해 Spooty 앱 설정에 붙여넣습니다.
+     - Client ID 복사 ➜ 앱 설정에 붙여넣기
+     - View client secret 클릭 후 복사 ➜ 앱 설정에 붙여넣기
+   - 원하는 다운로드 경로 및 포맷을 선택한 후 설정을 저장합니다.
+3. **3단계: 곡 다운로드 방법**
+   - Spooty 앱에서 곡/앨범/아티스트를 검색합니다.
+   - 원하는 결과 옆의 다운로드 버튼을 누릅니다.
+
 #### macOS 데스크톱 앱 안내 (한국어)
 1. **1단계: 설치 및 실행 권한 부여**
    - 설치: 다운로드한 `.dmg` 파일을 열고 Spooty 아이콘을 Applications(응용 프로그램) 폴더로 드래그합니다.
