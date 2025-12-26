@@ -29,6 +29,13 @@ type TranslationMap = {
   downloadTitle: string;
   downloadPlaceholder: string;
   downloadButton: string;
+  searchButton: string;
+  searchResultsTitle: string;
+  searchNoResults: string;
+  searchError: string;
+  searchTypeTrack: string;
+  searchTypeAlbum: string;
+  searchTypeArtist: string;
   playlistsTitle: string;
   playlistsRemoveCompletedTitle: string;
   playlistsRemoveFailedTitle: string;
@@ -87,10 +94,17 @@ export class I18nService {
       settingsLoadError: 'Failed to load settings.',
       settingsSaveError: 'Failed to save settings.',
       settingsToggleVisibility: 'Toggle visibility',
-      downloadTitle: 'Download',
-      downloadPlaceholder: 'Paste playlist/song/artist URL',
+      downloadTitle: 'Search & Download',
+      downloadPlaceholder: 'Search tracks, albums, or artists',
       downloadButton: 'Download',
-      playlistsTitle: 'Playlists',
+      searchButton: 'Search',
+      searchResultsTitle: 'Results',
+      searchNoResults: 'No results found.',
+      searchError: 'Search failed. Check Spotify credentials in Settings.',
+      searchTypeTrack: 'Track',
+      searchTypeAlbum: 'Album',
+      searchTypeArtist: 'Artist',
+      playlistsTitle: 'Downloads',
       playlistsRemoveCompletedTitle: 'Remove completed from list',
       playlistsRemoveFailedTitle: 'Remove failed from list',
       instructionsTitle: 'How to Use',
@@ -114,8 +128,8 @@ export class I18nService {
         'Go back to the site, click View client secret, copy it, and paste it into the Spooty app settings.',
         'At this step, you do not need to change anything in Settings except those two values and the download path.',
         'If the download format and path look good, save the settings.',
-        'Copy a track/album/artist link from Spotify and paste it into the Spooty app.',
-        'Click the download button.',
+        'Search for a track, album, or artist inside Spooty.',
+        'Click Download next to the result you want.',
       ],
       spotifySteps: [
         'Log in to https://www.youtube.com in a browser.',
@@ -166,10 +180,17 @@ export class I18nService {
       settingsLoadError: '설정을 불러오지 못했습니다.',
       settingsSaveError: '설정을 저장하지 못했습니다.',
       settingsToggleVisibility: '표시 전환',
-      downloadTitle: '다운로드',
-      downloadPlaceholder: 'Spotify 플레이리스트/곡/아티스트 URL을 붙여넣기',
+      downloadTitle: '검색 및 다운로드',
+      downloadPlaceholder: '곡/앨범/아티스트 검색하기',
       downloadButton: '다운로드',
-      playlistsTitle: '플레이리스트',
+      searchButton: '검색',
+      searchResultsTitle: '검색 결과',
+      searchNoResults: '검색 결과가 없습니다.',
+      searchError: '검색에 실패했습니다. 설정의 Spotify 키를 확인하세요.',
+      searchTypeTrack: '곡',
+      searchTypeAlbum: '앨범',
+      searchTypeArtist: '아티스트',
+      playlistsTitle: '다운로드',
       playlistsRemoveCompletedTitle: '완료된 항목 목록에서 제거',
       playlistsRemoveFailedTitle: '실패한 항목 목록에서 제거',
       instructionsTitle: '사용 방법',
@@ -193,8 +214,8 @@ export class I18nService {
         '다시 사이트로 돌아가서 View client secret을 눌러서 Client secret을 복사하고 Spooty 앱 설정에다가 붙여넣습니다.',
         '이 단계에서는 설정에서 이 둘과 다운로드 경로 외에는 만지지 않아도 됩니다.',
         '다운로드 포맷(여러가지 가능)과 경로가 마음에 들면 설정을 저장합니다.',
-        'Spotify에 접속해서 곡/앨범/아티스트 링크를 복사하고 Spooty 앱에다 붙여넣습니다.',
-        '다운로드 버튼을 누릅니다.',
+        'Spooty 앱에서 곡/앨범/아티스트를 검색합니다.',
+        '원하는 결과 옆의 다운로드 버튼을 누릅니다.',
       ],
       spotifySteps: [
         '인터넷 브라우저에서 https://www.youtube.com에 로그인합니다.',

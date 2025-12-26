@@ -5,10 +5,8 @@ import { PlaylistEntity } from './playlist.entity';
 import { TrackService } from '../track/track.service';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import * as fs from 'fs';
 import { Interval } from '@nestjs/schedule';
 import { TrackStatusEnum } from '../track/track.entity';
-import { UtilsService } from '../shared/utils.service';
 import { SpotifyService } from '../shared/spotify.service';
 
 enum WsPlaylistOperation {
@@ -27,7 +25,6 @@ export class PlaylistService {
     @InjectRepository(PlaylistEntity)
     private repository: Repository<PlaylistEntity>,
     private readonly trackService: TrackService,
-    private readonly utilsService: UtilsService,
     private readonly spotifyService: SpotifyService,
   ) {}
 
@@ -61,7 +58,6 @@ export class PlaylistService {
         name: detail.name,
         coverUrl: detail.image,
       };
-      this.createPlaylistFolderStructure(playlist2Save.name);
     } catch (err) {
       this.logger.error(`Error getting playlist details: ${err}`);
       playlist2Save = { ...playlist, error: String(err) };
@@ -151,11 +147,6 @@ export class PlaylistService {
     }
   }
 
-  private createPlaylistFolderStructure(playlistName: string): void {
-    const playlistPath = this.utilsService.getPlaylistFolderPath(playlistName);
-    !fs.existsSync(playlistPath) && fs.mkdirSync(playlistPath);
-  }
-
   @Interval(3_600_000)
   async checkActivePlaylists(): Promise<void> {
     const activePlaylists = await this.findAll({}, { active: true });
@@ -165,7 +156,6 @@ export class PlaylistService {
         tracks = await this.spotifyService.getPlaylistTracks(
           playlist.spotifyUrl,
         );
-        this.createPlaylistFolderStructure(playlist.name);
       } catch (err) {
         await this.update(playlist.id, { ...playlist, error: String(err) });
       }

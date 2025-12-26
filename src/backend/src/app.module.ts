@@ -11,6 +11,7 @@ import { PlaylistEntity } from './playlist/playlist.entity';
 import { EnvironmentEnum } from './environmentEnum';
 import { resolveFromBase } from './shared/path-resolver';
 import { SettingsModule } from './settings/settings.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { SettingsModule } from './settings/settings.module';
     TrackModule,
     PlaylistModule,
     SettingsModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [],

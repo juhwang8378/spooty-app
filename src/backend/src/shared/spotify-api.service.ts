@@ -4,6 +4,21 @@ const fetch = require('isomorphic-unfetch');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { getDetails } = require('spotify-url-info')(fetch);
 
+export type SpotifySearchType = 'track' | 'album' | 'artist';
+
+export interface SpotifySearchItem {
+  type: SpotifySearchType;
+  id: string;
+  name: string;
+  url: string;
+  image?: string;
+  subtitle?: string;
+}
+
+export interface SpotifySearchResponse {
+  items: SpotifySearchItem[];
+}
+
 @Injectable()
 export class SpotifyApiService {
   private readonly logger = new Logger(SpotifyApiService.name);
@@ -87,6 +102,113 @@ export class SpotifyApiService {
       return this.accessToken;
     } catch (error) {
       this.logger.error(`Error getting Spotify access token: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async search(
+    query: string,
+    types: SpotifySearchType[] = ['track', 'album', 'artist'],
+    limit?: number,
+  ): Promise<SpotifySearchResponse> {
+    const trimmedQuery = query?.trim();
+    if (!trimmedQuery) {
+      return { items: [] };
+    }
+
+    const allowedTypes: SpotifySearchType[] = ['track', 'album', 'artist'];
+    const normalizedTypes = (types || [])
+      .map((type) => type.toLowerCase())
+      .filter((type): type is SpotifySearchType =>
+        allowedTypes.includes(type as SpotifySearchType),
+      );
+    const effectiveTypes =
+      normalizedTypes.length > 0 ? normalizedTypes : allowedTypes;
+    const normalizedLimit = limit ?? Number.NaN;
+    const effectiveLimit = Number.isFinite(normalizedLimit)
+      ? Math.min(Math.max(normalizedLimit, 1), 50)
+      : 10;
+
+    try {
+      const accessToken = await this.getAccessToken();
+      const searchUrl = new URL('https://api.spotify.com/v1/search');
+      searchUrl.searchParams.set('q', trimmedQuery);
+      searchUrl.searchParams.set('type', effectiveTypes.join(','));
+      searchUrl.searchParams.set('limit', String(effectiveLimit));
+
+      const response = await fetch(searchUrl.toString(), {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        this.logger.error(
+          `Spotify search error: ${response.status} ${errorText}`,
+        );
+        throw new Error(`Failed to search Spotify: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const items: SpotifySearchItem[] = [];
+
+      const pickImage = (images: Array<{ url: string }> | undefined) =>
+        images?.[1]?.url || images?.[0]?.url || images?.[2]?.url;
+      const formatArtists = (artists: Array<{ name: string }> | undefined) =>
+        artists?.map((artist) => artist.name).filter(Boolean).join(', ');
+
+      for (const track of data?.tracks?.items ?? []) {
+        const artists = formatArtists(track.artists);
+        const albumName = track.album?.name;
+        const subtitle = [artists, albumName].filter(Boolean).join(' • ');
+        const url = track.external_urls?.spotify;
+        if (!url) {
+          continue;
+        }
+        items.push({
+          type: 'track',
+          id: track.id,
+          name: track.name,
+          url,
+          image: pickImage(track.album?.images),
+          subtitle: subtitle || undefined,
+        });
+      }
+
+      for (const album of data?.albums?.items ?? []) {
+        const artists = formatArtists(album.artists);
+        const url = album.external_urls?.spotify;
+        if (!url) {
+          continue;
+        }
+        items.push({
+          type: 'album',
+          id: album.id,
+          name: album.name,
+          url,
+          image: pickImage(album.images),
+          subtitle: artists || undefined,
+        });
+      }
+
+      for (const artist of data?.artists?.items ?? []) {
+        const url = artist.external_urls?.spotify;
+        if (!url) {
+          continue;
+        }
+        items.push({
+          type: 'artist',
+          id: artist.id,
+          name: artist.name,
+          url,
+          image: pickImage(artist.images),
+        });
+      }
+
+      return { items };
+    } catch (error) {
+      this.logger.error(`Spotify search failed: ${error.message}`);
       throw error;
     }
   }

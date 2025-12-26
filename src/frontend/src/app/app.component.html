@@ -110,14 +110,66 @@
     <div class="box">
       <p class="subtitle">{{ i18n.t('downloadTitle') }}</p>
       <div class="is-flex download-row">
-        <input class="input" type="text" [(ngModel)]="url" [placeholder]="i18n.t('downloadPlaceholder')"/>
+        <input class="input"
+               type="text"
+               [(ngModel)]="searchQuery"
+               [placeholder]="i18n.t('downloadPlaceholder')"
+               (keyup.enter)="search()"
+        />
         <button class="button is-primary"
-                [class.is-loading]="(createLoading$ | async)?.isLoading"
-                (click)="download()"
-                [disabled]="!url"
+                [class.is-loading]="searchLoading"
+                (click)="search()"
+                [disabled]="!searchQuery.trim()"
         >
-          <i class="fa-solid fa-download"></i> {{ i18n.t('downloadButton') }}
+          <i class="fa-solid fa-magnifying-glass"></i> {{ i18n.t('searchButton') }}
         </button>
+      </div>
+      <p class="help is-danger" *ngIf="searchErrorKey">{{ i18n.t(searchErrorKey) }}</p>
+      <p class="help" *ngIf="searchPerformed && !trackResults.length && !albumResults.length && !searchErrorKey">
+        {{ i18n.t('searchNoResults') }}
+      </p>
+      <div class="search-results" *ngIf="trackResults.length || albumResults.length">
+        <p class="has-text-weight-semibold">{{ i18n.t('searchResultsTitle') }}</p>
+        <div class="search-results-grid">
+          <div class="search-results-column">
+            <p class="search-results-label">{{ i18n.t('searchTypeTrack') }}</p>
+            <div class="search-result" *ngFor="let item of trackResults">
+              <div class="search-result-info">
+                <figure class="image is-48x48" *ngIf="item.image">
+                  <img [src]="item.image" alt="" />
+                </figure>
+                <div class="search-result-text">
+                  <p class="search-result-name">{{ item.name }}</p>
+                  <p class="search-result-meta" *ngIf="item.subtitle">{{ item.subtitle }}</p>
+                </div>
+              </div>
+              <div class="search-result-actions">
+                <button class="button is-small is-primary" (click)="downloadFromSearch(item)">
+                  <i class="fa-solid fa-download"></i> {{ i18n.t('downloadButton') }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="search-results-column">
+            <p class="search-results-label">{{ i18n.t('searchTypeAlbum') }}</p>
+            <div class="search-result" *ngFor="let item of albumResults">
+              <div class="search-result-info">
+                <figure class="image is-48x48" *ngIf="item.image">
+                  <img [src]="item.image" alt="" />
+                </figure>
+                <div class="search-result-text">
+                  <p class="search-result-name">{{ item.name }}</p>
+                  <p class="search-result-meta" *ngIf="item.subtitle">{{ item.subtitle }}</p>
+                </div>
+              </div>
+              <div class="search-result-actions">
+                <button class="button is-small is-primary" (click)="downloadFromSearch(item)">
+                  <i class="fa-solid fa-download"></i> {{ i18n.t('downloadButton') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <hr>
@@ -136,8 +188,13 @@
       <app-playlist-box *ngFor="let playlist of playlists$ | async" [playlist]="playlist"></app-playlist-box>
     </div>
     <div class="box">
-      <p class="subtitle">{{ i18n.t('aboutTitle') }}</p>
-      <pre class="license-text">MIT License
+      <div class="is-flex is-justify-content-space-between is-align-items-center">
+        <p class="subtitle">{{ i18n.t('aboutTitle') }}</p>
+        <button class="button is-small is-light" (click)="toggleAbout()">
+          <i class="fa-solid" [class.fa-chevron-down]="!aboutOpen" [class.fa-chevron-up]="aboutOpen"></i>
+        </button>
+      </div>
+      <pre class="license-text" *ngIf="aboutOpen">MIT License
 
 Copyright (c) 2024 Filip Gulan
 

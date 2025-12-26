@@ -5,6 +5,7 @@ import { TrackEntity, TrackStatusEnum } from './track.entity';
 import { PlaylistEntity } from '../playlist/playlist.entity';
 import { ConfigService } from '@nestjs/config';
 import { resolve } from 'path';
+import * as fs from 'fs';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { EnvironmentEnum } from '../environmentEnum';
@@ -127,7 +128,7 @@ export class TrackService {
     });
     let error: string;
     try {
-      const folderName = this.getFolderName(track, track.playlist);
+      const folderName = this.getFolderName(track);
       await this.youtubeService.downloadAndFormat(track, folderName);
       await this.youtubeService.addImage(
         folderName,
@@ -154,11 +155,11 @@ export class TrackService {
     return `${this.utilsService.stripFileIllegalChars(fileName)}.${this.configService.get<string>(EnvironmentEnum.FORMAT)}`;
   }
 
-  getFolderName(track: TrackEntity, playlist: PlaylistEntity): string {
-    const safePlaylistName = playlist?.name || 'unknown_playlist';
-    return resolve(
-      this.utilsService.getPlaylistFolderPath(safePlaylistName),
-      this.getTrackFileName(track),
-    );
+  getFolderName(track: TrackEntity): string {
+    const artistFolder = this.utilsService.getArtistFolderPath(track.artist);
+    if (!fs.existsSync(artistFolder)) {
+      fs.mkdirSync(artistFolder, { recursive: true });
+    }
+    return resolve(artistFolder, this.getTrackFileName(track));
   }
 }

@@ -8,7 +8,7 @@
 ![spooty logo](assets/logo.svg)
 # Spooty - self-hosted Spotify downloader
 Spooty is a self-hosted Spotify downloader.
-It allows downloading tracks/playlists/albums/artists from Spotify URLs.
+It lets you search Spotify inside the app and download tracks, albums, or artists.
 It can also subscribe to playlists and download new songs upon release.
 Spooty does not download audio from Spotify; it only uses Spotify for metadata and then finds and downloads matching music on YouTube.
 The project is based on NestJS and Angular.
@@ -28,6 +28,7 @@ The project is based on NestJS and Angular.
   - [Desktop app (macOS DMG)](#desktop-app-macos-dmg)
     - [Build steps](#build-steps)
     - [Settings](#settings)
+    - [Usage (desktop app)](#usage-desktop-app)
     - [macOS 데스크톱 앱 안내 (한국어)](#macos-데스크톱-앱-안내-한국어)
   - [Environment variables](#environment-variables)
   - [How to get your YouTube cookies (using browser dev tools)](#how-to-get-your-youtube-cookies-using-browser-dev-tools)
@@ -120,6 +121,12 @@ The DMG is generated under `src/desktop/dist`.
 The desktop app exposes a Settings panel where users enter Spotify credentials and other configuration values.
 Settings are stored per-user; no `.env` files are included in the packaged app.
 
+#### Usage (desktop app)
+1. Open Settings and enter your Spotify Client ID and Client Secret.
+2. Save Settings.
+3. Use the Search box to find a track, album, or artist.
+4. Click Download next to the result you want.
+
 #### macOS 데스크톱 앱 안내 (한국어)
 1. **1단계: 설치 및 실행 권한 부여**
    - 설치: 다운로드한 `.dmg` 파일을 열고 Spooty 아이콘을 Applications(응용 프로그램) 폴더로 드래그합니다.
@@ -137,8 +144,8 @@ Settings are stored per-user; no `.env` files are included in the packaged app.
      - View client secret 클릭 후 복사 ➜ 앱 설정에 붙여넣기
    - 원하는 다운로드 경로 및 포맷을 선택한 후 설정을 저장합니다.
 3. **3단계: 곡 다운로드 방법**
-   - Spotify에서 곡/앨범/아티스트의 링크를 복사합니다.
-   - Spooty 앱에 링크를 붙여넣고 다운로드 버튼을 누릅니다.
+   - Spooty 앱에서 곡/앨범/아티스트를 검색합니다.
+   - 원하는 결과 옆의 다운로드 버튼을 누릅니다.
 
 ##### 🛠 다운로드 오류 시 해결 방법 (YouTube 쿠키 설정)
 다운로드가 진행되지 않는다면 YouTube 권한 문제일 수 있습니다.

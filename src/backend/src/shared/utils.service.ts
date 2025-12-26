@@ -17,6 +17,16 @@ export class UtilsService {
     return resolve(downloadsPath, this.stripFileIllegalChars(name));
   }
 
+  getArtistFolderPath(artist: string): string {
+    const baseDir = process.env.SPOOTY_BASE_DIR || resolve(__dirname, '..');
+    const downloadsPath = resolveFromBase(
+      this.configService.get<string>(EnvironmentEnum.DOWNLOADS_PATH),
+      baseDir,
+    );
+    const safeArtist = this.stripFileIllegalChars(artist || 'unknown_artist');
+    return resolve(downloadsPath, safeArtist);
+  }
+
   stripFileIllegalChars(text: string): string {
     return text.replace(/[/\\?%*:|"<>]/g, '-');
   }

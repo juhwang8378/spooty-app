@@ -7,6 +7,8 @@ import {VersionService} from "./services/version.service";
 import {SettingsService} from "./services/settings.service";
 import {AppSettings} from "./models/settings";
 import {I18nService, LanguageCode} from "./services/i18n.service";
+import { SearchResultItem } from './models/search';
+import { SearchService } from './services/search.service';
 
 @Component({
     selector: 'app-root',
@@ -17,12 +19,17 @@ import {I18nService, LanguageCode} from "./services/i18n.service";
 })
 export class AppComponent {
 
-  url = ''
-  createLoading$ = this.playlistService.createLoading$;
+  searchQuery = '';
+  trackResults: SearchResultItem[] = [];
+  albumResults: SearchResultItem[] = [];
+  searchLoading = false;
+  searchErrorKey = '';
+  searchPerformed = false;
   playlists$ = this.playlistService.all$;
   version = this.versionService.getVersion();
   settingsOpen = false;
   instructionsOpen = true;
+  aboutOpen = false;
   settingsLoading = false;
   settingsSaving = false;
   settingsMessageKey = '';
@@ -35,6 +42,7 @@ export class AppComponent {
     private readonly playlistService: PlaylistService,
     private readonly versionService: VersionService,
     private readonly settingsService: SettingsService,
+    private readonly searchService: SearchService,
     public readonly i18n: I18nService,
   ) {
     this.fetchPlaylists();
@@ -45,9 +53,38 @@ export class AppComponent {
     this.playlistService.fetch();
   }
 
-  download(): void {
-    this.url && this.playlistService.create(this.url);
-    this.url = '';
+  search(): void {
+    const query = this.searchQuery.trim();
+    if (!query) {
+      this.trackResults = [];
+      this.albumResults = [];
+      this.searchPerformed = false;
+      return;
+    }
+    this.searchLoading = true;
+    this.searchErrorKey = '';
+    this.searchService.search(query).subscribe({
+      next: (response) => {
+        const items = response?.items ?? [];
+        this.trackResults = items.filter((item) => item.type === 'track');
+        this.albumResults = items.filter((item) => item.type === 'album');
+        this.searchLoading = false;
+        this.searchPerformed = true;
+      },
+      error: () => {
+        this.trackResults = [];
+        this.albumResults = [];
+        this.searchErrorKey = 'searchError';
+        this.searchLoading = false;
+        this.searchPerformed = true;
+      },
+    });
+  }
+
+  downloadFromSearch(item: SearchResultItem): void {
+    if (item?.url) {
+      this.playlistService.create(item.url);
+    }
   }
 
   deleteCompleted(): void {
@@ -66,6 +103,10 @@ export class AppComponent {
 
   toggleInstructions(): void {
     this.instructionsOpen = !this.instructionsOpen;
+  }
+
+  toggleAbout(): void {
+    this.aboutOpen = !this.aboutOpen;
   }
 
   loadSettings(): void {
@@ -104,4 +145,5 @@ export class AppComponent {
     this.settingsMessageKey = '';
     this.settingsErrorKey = '';
   }
+
 }
