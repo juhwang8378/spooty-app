@@ -13,6 +13,36 @@ It can also subscribe to playlists and download new songs upon release.
 Spooty does not download audio from Spotify; it only uses Spotify for metadata and then finds and downloads matching music on YouTube.
 The project is based on NestJS and Angular.
 
+#### macOS 데스크톱 앱 안내 (한국어)
+1. **1단계: 설치 및 실행 권한 부여**
+   - 설치: 다운로드한 `.dmg` 파일을 열고 Spooty 아이콘을 Applications(응용 프로그램) 폴더로 드래그합니다.
+   - 권한 해제: 터미널(Terminal)을 열고 아래 코드를 복사해서 실행합니다. (Mac 보안 경고 해결용)
+     ```bash
+     xattr -dr com.apple.quarantine /Applications/Spooty.app
+     ```
+   - 실행: Spooty 앱을 실행하여 정상 작동하는지 확인합니다.
+2. **2단계: Spotify API 연동 (최초 1회)**
+   - Spotify Developer Dashboard에 접속하여 로그인합니다.
+   - Create App을 클릭하여 새 앱을 만듭니다. (이름/설명은 자유)
+   - Redirect URI 항목에 `https://127.0.0.1:3000`을 입력하고 저장합니다.
+   - 만들어진 앱의 Settings에서 다음 정보를 복사해 Spooty 앱 설정에 붙여넣습니다.
+     - Client ID 복사 ➜ 앱 설정에 붙여넣기
+     - View client secret 클릭 후 복사 ➜ 앱 설정에 붙여넣기
+   - 원하는 다운로드 경로 및 포맷을 선택한 후 설정을 저장합니다.
+3. **3단계: 곡 다운로드 방법**
+   - Spooty 앱에서 곡/앨범/아티스트를 검색합니다.
+   - 원하는 결과 옆의 다운로드 버튼을 누릅니다.
+
+##### 🛠 다운로드 오류 시 해결 방법 (YouTube 쿠키 설정)
+다운로드가 진행되지 않는다면 YouTube 권한 문제일 수 있습니다.
+1. 브라우저에서 YouTube 로그인 후 개발자 도구(Option + Command + I)를 켭니다.
+2. Application 탭 > Cookies > `youtube.com`을 선택합니다.
+3. 목록에 있는 모든 쿠키를 `이름=값;` 형식으로 이어 붙여 복사합니다.
+   - 예: `VISITOR_INFO1_LIVE=abc; YSC=def; SID=ghi...`
+4. 이 문자열을 앱의 Settings > YouTube Cookies에 붙여넣고 저장하세요.
+
+참고: 쿠키가 만료되면 이 과정을 다시 반복해야 합니다.
+
 > [!IMPORTANT]
 > Please do not use this tool for piracy! Download only music you own rights! Use this tool only on your responsibility.
 
@@ -126,36 +156,6 @@ Settings are stored per-user; no `.env` files are included in the packaged app.
 2. Save Settings.
 3. Use the Search box to find a track, album, or artist.
 4. Click Download next to the result you want.
-
-#### macOS 데스크톱 앱 안내 (한국어)
-1. **1단계: 설치 및 실행 권한 부여**
-   - 설치: 다운로드한 `.dmg` 파일을 열고 Spooty 아이콘을 Applications(응용 프로그램) 폴더로 드래그합니다.
-   - 권한 해제: 터미널(Terminal)을 열고 아래 코드를 복사해서 실행합니다. (Mac 보안 경고 해결용)
-     ```bash
-     xattr -dr com.apple.quarantine /Applications/Spooty.app
-     ```
-   - 실행: Spooty 앱을 실행하여 정상 작동하는지 확인합니다.
-2. **2단계: Spotify API 연동 (최초 1회)**
-   - Spotify Developer Dashboard에 접속하여 로그인합니다.
-   - Create App을 클릭하여 새 앱을 만듭니다. (이름/설명은 자유)
-   - Redirect URI 항목에 `https://127.0.0.1:3000`을 입력하고 저장합니다.
-   - 만들어진 앱의 Settings에서 다음 정보를 복사해 Spooty 앱 설정에 붙여넣습니다.
-     - Client ID 복사 ➜ 앱 설정에 붙여넣기
-     - View client secret 클릭 후 복사 ➜ 앱 설정에 붙여넣기
-   - 원하는 다운로드 경로 및 포맷을 선택한 후 설정을 저장합니다.
-3. **3단계: 곡 다운로드 방법**
-   - Spooty 앱에서 곡/앨범/아티스트를 검색합니다.
-   - 원하는 결과 옆의 다운로드 버튼을 누릅니다.
-
-##### 🛠 다운로드 오류 시 해결 방법 (YouTube 쿠키 설정)
-다운로드가 진행되지 않는다면 YouTube 권한 문제일 수 있습니다.
-1. 브라우저에서 YouTube 로그인 후 개발자 도구(Option + Command + I)를 켭니다.
-2. Application 탭 > Cookies > `youtube.com`을 선택합니다.
-3. 목록에 있는 모든 쿠키를 `이름=값;` 형식으로 이어 붙여 복사합니다.
-   - 예: `VISITOR_INFO1_LIVE=abc; YSC=def; SID=ghi...`
-4. 이 문자열을 앱의 Settings > YouTube Cookies에 붙여넣고 저장하세요.
-
-참고: 쿠키가 만료되면 이 과정을 다시 반복해야 합니다.
 
 ### Environment variables
 
