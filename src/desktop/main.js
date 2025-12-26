@@ -34,6 +34,7 @@ function buildBackendEnv() {
   const backendDir = getBackendDir();
   const frontendDir = getFrontendDir();
   const depsBin = getDepsBinDir();
+  const isWindows = process.platform === 'win32';
   const env = {
     ...process.env,
     SPOOTY_USER_DATA_DIR: userDataDir,
@@ -48,16 +49,27 @@ function buildBackendEnv() {
 
   if (fs.existsSync(depsBin)) {
     env.PATH = `${depsBin}${path.delimiter}${env.PATH || ''}`;
-    const ytDlpByArch = path.join(depsBin, `yt-dlp-${process.arch}`);
-    const ytDlpDefault = path.join(depsBin, 'yt-dlp');
-    if (fs.existsSync(ytDlpByArch)) {
-      env.YTDLP_BINARY_PATH = ytDlpByArch;
-    } else if (fs.existsSync(ytDlpDefault)) {
-      env.YTDLP_BINARY_PATH = ytDlpDefault;
+    const ytDlpCandidates = [
+      path.join(depsBin, `yt-dlp-${process.arch}${isWindows ? '.exe' : ''}`),
+      path.join(depsBin, `yt-dlp${isWindows ? '.exe' : ''}`),
+      path.join(depsBin, `yt-dlp-${process.arch}`),
+      path.join(depsBin, 'yt-dlp'),
+    ];
+    for (const candidate of ytDlpCandidates) {
+      if (candidate && fs.existsSync(candidate)) {
+        env.YTDLP_BINARY_PATH = candidate;
+        break;
+      }
     }
-    const ffmpegPath = path.join(depsBin, 'ffmpeg');
-    if (fs.existsSync(ffmpegPath)) {
-      env.FFMPEG_PATH = ffmpegPath;
+    const ffmpegCandidates = [
+      path.join(depsBin, `ffmpeg${isWindows ? '.exe' : ''}`),
+      path.join(depsBin, 'ffmpeg'),
+    ];
+    for (const candidate of ffmpegCandidates) {
+      if (candidate && fs.existsSync(candidate)) {
+        env.FFMPEG_PATH = candidate;
+        break;
+      }
     }
   }
 

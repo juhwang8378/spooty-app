@@ -1,0 +1,44 @@
+name: build-windows
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    env:
+      CI: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.19.1'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Download yt-dlp binaries
+        run: npm run deps:download
+
+      - name: Build frontend/backend
+        run: npm run build
+
+      - name: Prepare backend dependencies
+        run: node scripts/prepare-backend-deps.mjs
+
+      - name: Build Windows installer
+        run: npm run dist -w src/desktop
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spooty-windows
+          path: src/desktop/dist/**
+          if-no-files-found: error

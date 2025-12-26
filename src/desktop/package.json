@@ -7,7 +7,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "node ../../scripts/prepare-backend-deps.mjs && electron-builder --mac dmg"
+    "dist": "node ../../scripts/prepare-backend-deps.mjs && electron-builder",
+    "dist:win": "node ../../scripts/prepare-backend-deps.mjs && electron-builder --win nsis"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.6.0",
@@ -29,6 +30,9 @@
       "category": "public.app-category.music",
       "target": ["dmg"],
       "identity": null
+    },
+    "win": {
+      "target": ["nsis"]
     },
     "dmg": {
       "writeUpdateInfo": false

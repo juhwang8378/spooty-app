@@ -59,6 +59,7 @@ The project is based on NestJS and Angular.
     - [Build steps](#build-steps)
     - [Settings](#settings)
     - [Usage (desktop app)](#usage-desktop-app)
+    - [Windows EXE (via GitHub Actions)](#windows-exe-via-github-actions)
     - [macOS 데스크톱 앱 안내 (한국어)](#macos-데스크톱-앱-안내-한국어)
   - [Environment variables](#environment-variables)
   - [How to get your YouTube cookies (using browser dev tools)](#how-to-get-your-youtube-cookies-using-browser-dev-tools)
@@ -125,6 +126,7 @@ Tip: use `nvm` (or your preferred Node version manager) to match `.nvmrc`. Local
 #### Process
 - install Node v18.19.1 using `nvm install` and use that node version `nvm use`
 - from project root install all dependencies using `npm install`
+- download bundled `yt-dlp` binaries using `npm run deps:download`
 - copy `.env.default` as `.env` in `src/backend` folder and modify desired environment properties (see [environment variables](#environment-variables))
 - add your Spotify application credentials to the `.env` file:
   ```
@@ -132,6 +134,7 @@ Tip: use `nvm` (or your preferred Node version manager) to match `.nvmrc`. Local
   SPOTIFY_CLIENT_SECRET=your_client_secret
   ```
 - build source files `npm run build`
+    - if Angular build crashes, retry with `CI=1 npm run build`
     - built project will be stored in `dist` folder
 - start server `npm run start`
 
@@ -142,8 +145,9 @@ This project can be packaged as a signed macOS app with an embedded UI.
 #### Build steps
 1. Install dependencies: `npm install`
 2. Download bundled `yt-dlp` binaries: `npm run deps:download`
-3. Build backend + frontend: `npm run build`
-4. Create the DMG: `npm run build:desktop`
+3. Build backend + frontend: `npm run build` (if it crashes, use `CI=1 npm run build`)
+4. Prepare backend native dependencies for Electron: `node scripts/prepare-backend-deps.mjs`
+5. Create the DMG: `npm run build:desktop`
 
 The DMG is generated under `src/desktop/dist`.
 
@@ -156,6 +160,11 @@ Settings are stored per-user; no `.env` files are included in the packaged app.
 2. Save Settings.
 3. Use the Search box to find a track, album, or artist.
 4. Click Download next to the result you want.
+
+#### Windows EXE (via GitHub Actions)
+If you're on macOS, use the GitHub Actions workflow to build a Windows installer:
+1. Push a tag like `v2.2.2` or run the `build-windows` workflow manually.
+2. Download the artifact from the workflow run (it includes the `.exe`).
 
 ### Environment variables
 

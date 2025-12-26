@@ -21,6 +21,12 @@ const downloads = [
     ],
     dest: path.join(binDir, 'yt-dlp-arm64'),
   },
+  {
+    urls: [
+      'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe',
+    ],
+    dest: path.join(binDir, 'yt-dlp-x64.exe'),
+  },
 ];
 
 function downloadFile(url, dest) {

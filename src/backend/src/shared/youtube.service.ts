@@ -38,9 +38,22 @@ export class YoutubeService {
     }
 
     const resourcesPath = process.env.SPOOTY_RESOURCES_PATH;
+    const isWindows = process.platform === 'win32';
     if (resourcesPath) {
       const archSuffix = process.arch;
       const candidates = [
+        path.join(
+          resourcesPath,
+          'deps',
+          'bin',
+          `yt-dlp-${archSuffix}${isWindows ? '.exe' : ''}`,
+        ),
+        path.join(
+          resourcesPath,
+          'deps',
+          'bin',
+          `yt-dlp${isWindows ? '.exe' : ''}`,
+        ),
         path.join(resourcesPath, 'deps', 'bin', `yt-dlp-${archSuffix}`),
         path.join(resourcesPath, 'deps', 'bin', 'yt-dlp'),
       ];
@@ -91,7 +104,12 @@ export class YoutubeService {
 
     const resourcesPath = process.env.SPOOTY_RESOURCES_PATH;
     if (resourcesPath) {
-      const candidate = path.join(resourcesPath, 'deps', 'bin', 'ffmpeg');
+      const candidate = path.join(
+        resourcesPath,
+        'deps',
+        'bin',
+        `ffmpeg${process.platform === 'win32' ? '.exe' : ''}`,
+      );
       if (fs.existsSync(candidate)) {
         return candidate;
       }
