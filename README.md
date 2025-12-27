@@ -14,6 +14,7 @@ Spooty does not download audio from Spotify; it only uses Spotify for metadata a
 The project is based on NestJS and Angular.
 
 #### macOS 데스크톱 앱 안내 (한국어)
+![download](assets/download.jpg)
 1. **1단계: 설치 및 실행 권한 부여**
    - 설치: 다운로드한 `.dmg` 파일을 열고 Spooty 아이콘을 Applications(응용 프로그램) 폴더로 드래그합니다.
    - 권한 해제: 터미널(Terminal)을 열고 아래 코드를 복사해서 실행합니다. (Mac 보안 경고 해결용)
