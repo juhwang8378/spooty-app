@@ -96,6 +96,7 @@ export class PlaylistService {
               artist: track.artist,
               name: track.name,
               spotifyUrl: track.previewUrl || null,
+              durationMs: track.durationMs,
             },
             savedPlaylist,
           );
@@ -164,6 +165,7 @@ export class PlaylistService {
           artist: track.artist,
           name: track.name,
           spotifyUrl: track.previewUrl,
+          durationMs: track.durationMs,
         };
         const isExist = !!(
           await this.trackService.getAll({

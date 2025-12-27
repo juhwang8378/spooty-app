@@ -27,6 +27,9 @@ export class TrackEntity {
   @Column({ nullable: true })
   youtubeUrl?: string;
 
+  @Column({ nullable: true })
+  durationMs?: number;
+
   @Column({ default: TrackStatusEnum.New })
   status?: TrackStatusEnum;
 

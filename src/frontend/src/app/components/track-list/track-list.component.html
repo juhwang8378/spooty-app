@@ -1,6 +1,6 @@
 <a class="panel-block is-flex is-justify-content-space-between" *ngFor="let track of tracks$ | async">
   <div>
-    <span>{{ track.artist }} - {{ track.name }}</span>&nbsp;
+    <span class="track-title">{{ track.artist }} - {{ track.name }}</span>&nbsp;
     <a [href]="track.spotifyUrl"
        target="_blank"
        class="has-text-primary margin-left" [title]="i18n.t('trackSpotifyPreviewTitle')">

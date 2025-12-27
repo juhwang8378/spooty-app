@@ -25,10 +25,12 @@ export class AppComponent {
   searchLoading = false;
   searchErrorKey = '';
   searchPerformed = false;
+  activePreviewKey: string | null = null;
+  private readonly previewAudio = new Audio();
   playlists$ = this.playlistService.all$;
   version = this.versionService.getVersion();
   settingsOpen = false;
-  instructionsOpen = true;
+  instructionsOpen = false;
   aboutOpen = false;
   settingsLoading = false;
   settingsSaving = false;
@@ -47,6 +49,8 @@ export class AppComponent {
   ) {
     this.fetchPlaylists();
     this.loadSettings();
+    this.previewAudio.addEventListener('ended', () => this.stopPreview());
+    this.previewAudio.addEventListener('error', () => this.stopPreview());
   }
 
   fetchPlaylists(): void {
@@ -59,6 +63,7 @@ export class AppComponent {
       this.trackResults = [];
       this.albumResults = [];
       this.searchPerformed = false;
+      this.stopPreview();
       return;
     }
     this.searchLoading = true;
@@ -68,12 +73,14 @@ export class AppComponent {
         const items = response?.items ?? [];
         this.trackResults = items.filter((item) => item.type === 'track');
         this.albumResults = items.filter((item) => item.type === 'album');
+        this.stopPreview();
         this.searchLoading = false;
         this.searchPerformed = true;
       },
       error: () => {
         this.trackResults = [];
         this.albumResults = [];
+        this.stopPreview();
         this.searchErrorKey = 'searchError';
         this.searchLoading = false;
         this.searchPerformed = true;
@@ -85,6 +92,47 @@ export class AppComponent {
     if (item?.url) {
       this.playlistService.create(item.url);
     }
+  }
+
+  togglePreview(item: SearchResultItem): void {
+    const previewUrl = item?.previewUrl?.trim();
+    if (!previewUrl) {
+      return;
+    }
+    const previewKey = this.getPreviewKey(item);
+    if (this.activePreviewKey === previewKey) {
+      if (this.previewAudio.paused) {
+        this.previewAudio.play().catch(() => this.stopPreview());
+      } else {
+        this.previewAudio.pause();
+      }
+      return;
+    }
+    this.previewAudio.pause();
+    this.previewAudio.currentTime = 0;
+    this.previewAudio.src = previewUrl;
+    this.activePreviewKey = previewKey;
+    this.previewAudio.play().catch(() => this.stopPreview());
+  }
+
+  isPreviewPlaying(item: SearchResultItem): boolean {
+    return (
+      this.activePreviewKey === this.getPreviewKey(item) &&
+      !this.previewAudio.paused
+    );
+  }
+
+  hasPreview(item: SearchResultItem): boolean {
+    return Boolean(item?.previewUrl?.trim());
+  }
+
+  previewTitle(item: SearchResultItem): string {
+    if (!this.hasPreview(item)) {
+      return this.i18n.t('previewUnavailableTitle');
+    }
+    return this.isPreviewPlaying(item)
+      ? this.i18n.t('previewPauseTitle')
+      : this.i18n.t('previewPlayTitle');
   }
 
   deleteCompleted(): void {
@@ -146,4 +194,14 @@ export class AppComponent {
     this.settingsErrorKey = '';
   }
 
+  private stopPreview(): void {
+    this.previewAudio.pause();
+    this.previewAudio.currentTime = 0;
+    this.previewAudio.removeAttribute('src');
+    this.activePreviewKey = null;
+  }
+
+  private getPreviewKey(item: SearchResultItem): string {
+    return `${item.type}:${item.id}`;
+  }
 }

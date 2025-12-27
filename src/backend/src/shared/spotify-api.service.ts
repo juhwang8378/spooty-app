@@ -13,6 +13,8 @@ export interface SpotifySearchItem {
   url: string;
   image?: string;
   subtitle?: string;
+  previewUrl?: string;
+  durationMs?: number;
 }
 
 export interface SpotifySearchResponse {
@@ -47,7 +49,7 @@ export class SpotifyApiService {
   ): Promise<{ name: string; image: string }> {
     try {
       this.logger.debug(`Getting playlist metadata for ${spotifyUrl}`);
-      const detail = await getDetails(spotifyUrl);
+      const detail = await this.getDetailsWithLocale(spotifyUrl);
 
       return {
         name: detail.preview.title,
@@ -106,6 +108,94 @@ export class SpotifyApiService {
     }
   }
 
+  private async fillTrackPreviewUrls(
+    trackItems: SpotifySearchItem[],
+    accessToken: string,
+  ): Promise<void> {
+    const missing = trackItems.filter((item) => !item.previewUrl && item.id);
+    if (missing.length === 0) {
+      return;
+    }
+
+    const market = this.getMarketParam();
+    const previewMap = new Map<string, string>();
+    const chunkSize = 50;
+
+    for (let i = 0; i < missing.length; i += chunkSize) {
+      const ids = missing.slice(i, i + chunkSize).map((item) => item.id);
+      const tracksUrl = new URL('https://api.spotify.com/v1/tracks');
+      tracksUrl.searchParams.set('ids', ids.join(','));
+      if (market) {
+        tracksUrl.searchParams.set('market', market);
+      }
+
+      try {
+        const response = await fetch(tracksUrl.toString(), {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          this.logger.debug(
+            `Spotify track preview error: ${response.status} ${errorText}`,
+          );
+          continue;
+        }
+
+        const data = await response.json();
+        for (const track of data?.tracks ?? []) {
+          if (track?.id && track.preview_url) {
+            previewMap.set(track.id, track.preview_url);
+          }
+        }
+      } catch (error) {
+        this.logger.debug(
+          `Spotify track preview fetch failed: ${error.message}`,
+        );
+      }
+    }
+
+    for (const item of missing) {
+      const previewUrl = previewMap.get(item.id);
+      if (previewUrl) {
+        item.previewUrl = previewUrl;
+      }
+    }
+  }
+
+  private async fillTrackPreviewUrlsFromDetails(
+    trackItems: SpotifySearchItem[],
+  ): Promise<void> {
+    const missing = trackItems.filter((item) => !item.previewUrl && item.url);
+    if (missing.length === 0) {
+      return;
+    }
+
+    await Promise.all(
+      missing.map(async (item) => {
+        try {
+          const detail = await this.getDetailsWithLocale(item.url);
+          const previewUrl =
+            detail?.tracks?.[0]?.previewUrl || detail?.preview?.audio;
+          if (previewUrl) {
+            item.previewUrl = previewUrl;
+          }
+        } catch (error) {
+          this.logger.debug(
+            `Spotify preview details failed for ${item.url}: ${error.message}`,
+          );
+        }
+      }),
+    );
+  }
+  private getMarketParam(): string | undefined {
+    const raw = process.env.SPOTIFY_MARKET;
+    const trimmed = raw?.trim();
+    return trimmed || 'US';
+  }
+
   async search(
     query: string,
     types: SpotifySearchType[] = ['track', 'album', 'artist'],
@@ -135,6 +225,10 @@ export class SpotifyApiService {
       searchUrl.searchParams.set('q', trimmedQuery);
       searchUrl.searchParams.set('type', effectiveTypes.join(','));
       searchUrl.searchParams.set('limit', String(effectiveLimit));
+      const market = this.getMarketParam();
+      if (market) {
+        searchUrl.searchParams.set('market', market);
+      }
 
       const response = await fetch(searchUrl.toString(), {
         headers: {
@@ -152,6 +246,8 @@ export class SpotifyApiService {
 
       const data = await response.json();
       const items: SpotifySearchItem[] = [];
+      const trackItems: SpotifySearchItem[] = [];
+      const albumItems: SpotifySearchItem[] = [];
 
       const pickImage = (images: Array<{ url: string }> | undefined) =>
         images?.[1]?.url || images?.[0]?.url || images?.[2]?.url;
@@ -166,15 +262,21 @@ export class SpotifyApiService {
         if (!url) {
           continue;
         }
-        items.push({
+        trackItems.push({
           type: 'track',
           id: track.id,
           name: track.name,
           url,
           image: pickImage(track.album?.images),
           subtitle: subtitle || undefined,
+          previewUrl: track.preview_url || undefined,
+          durationMs: this.normalizeDuration(track.duration_ms),
         });
       }
+
+      await this.fillTrackPreviewUrls(trackItems, accessToken);
+      await this.fillTrackPreviewUrlsFromDetails(trackItems);
+      items.push(...trackItems);
 
       for (const album of data?.albums?.items ?? []) {
         const artists = formatArtists(album.artists);
@@ -182,7 +284,7 @@ export class SpotifyApiService {
         if (!url) {
           continue;
         }
-        items.push({
+        albumItems.push({
           type: 'album',
           id: album.id,
           name: album.name,
@@ -191,6 +293,9 @@ export class SpotifyApiService {
           subtitle: artists || undefined,
         });
       }
+
+      await this.applyLocalizedSearchMetadata(trackItems, albumItems);
+      items.push(...albumItems);
 
       for (const artist of data?.artists?.items ?? []) {
         const url = artist.external_urls?.spotify;
@@ -217,13 +322,26 @@ export class SpotifyApiService {
     try {
       this.logger.debug(`Getting all tracks for playlist ${spotifyUrl}`);
 
-      const detail = await getDetails(spotifyUrl);
+      const detail = await this.getDetailsWithLocale(spotifyUrl);
+      const normalizedDetailTracks = (detail.tracks ?? [])
+        .map((track: { artist: string; name: string; previewUrl?: string; duration?: number }) => {
+          if (!track?.artist || !track?.name) {
+            return null;
+          }
+          return {
+            artist: track.artist,
+            name: track.name,
+            previewUrl: track.previewUrl,
+            durationMs: this.normalizeDuration(track.duration),
+          };
+        })
+        .filter(Boolean);
       this.logger.debug(
         `Initial tracks count from spotify-url-info: ${detail.tracks?.length || 0}`,
       );
 
       if (!detail.tracks || detail.tracks.length < 100) {
-        return detail.tracks || [];
+        return normalizedDetailTracks;
       }
 
       this.logger.debug(
@@ -247,14 +365,20 @@ export class SpotifyApiService {
             `Fetching tracks from Spotify API with offset ${offset}`,
           );
 
-          const response = await fetch(
-            `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=${offset}&limit=100&fields=items(track(name,artists,preview_url)),next`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            },
+          const playlistUrl = new URL(
+            `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
           );
+          playlistUrl.searchParams.set('offset', String(offset));
+          playlistUrl.searchParams.set('limit', '100');
+          playlistUrl.searchParams.set(
+            'fields',
+            'items(track(name,artists,preview_url,duration_ms)),next',
+          );
+          const response = await fetch(playlistUrl.toString(), {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
 
           if (!response.ok) {
             const errorText = await response.text();
@@ -275,7 +399,12 @@ export class SpotifyApiService {
           const pageTracks = data.items
             .map(
               (item: {
-                track: { name: any; artists: any[]; preview_url: any };
+                track: {
+                  name: string;
+                  artists: Array<{ name: string }>;
+                  preview_url?: string;
+                  duration_ms?: number;
+                };
               }) => {
                 if (!item.track) return null;
 
@@ -283,6 +412,7 @@ export class SpotifyApiService {
                   name: item.track.name,
                   artist: item.track.artists.map((a) => a.name).join(', '),
                   previewUrl: item.track.preview_url,
+                  durationMs: this.normalizeDuration(item.track.duration_ms),
                 };
               },
             )
@@ -312,11 +442,119 @@ export class SpotifyApiService {
           `Failed to get tracks from Spotify API: ${apiError.message}`,
         );
         this.logger.debug('Falling back to initial tracks only');
-        return detail.tracks || [];
+        return normalizedDetailTracks;
       }
     } catch (error) {
       this.logger.error(`Failed to get all playlist tracks: ${error.message}`);
       throw error;
     }
+  }
+
+  private async getDetailsWithLocale(spotifyUrl: string): Promise<any> {
+    const locale = this.getSpotifyLocale();
+    if (!locale) {
+      return getDetails(spotifyUrl);
+    }
+    try {
+      return await getDetails(spotifyUrl, {
+        headers: {
+          'Accept-Language': locale,
+        },
+      });
+    } catch (error) {
+      this.logger.debug(
+        `Spotify localized details failed, falling back: ${error.message}`,
+      );
+      return getDetails(spotifyUrl);
+    }
+  }
+
+  private getSpotifyLocale(): string | undefined {
+    const raw = process.env.SPOTIFY_LOCALE;
+    const trimmed = raw?.trim();
+    return trimmed || 'ko';
+  }
+
+  private hasHangul(value?: string): boolean {
+    if (!value) {
+      return false;
+    }
+    return /[\uac00-\ud7a3]/.test(value);
+  }
+
+  private async applyLocalizedSearchMetadata(
+    trackItems: SpotifySearchItem[],
+    albumItems: SpotifySearchItem[],
+  ): Promise<void> {
+    const locale = this.getSpotifyLocale();
+    if (!locale) {
+      return;
+    }
+    const candidates = [...trackItems, ...albumItems];
+    await Promise.all(
+      candidates.map(async (item) => {
+        if (!item.url) {
+          return;
+        }
+        try {
+          const detail = await this.getDetailsWithLocale(item.url);
+          if (item.type === 'track') {
+            const localizedTrack = detail?.tracks?.[0];
+            const localizedName =
+              localizedTrack?.name || detail?.preview?.track;
+            const localizedArtist =
+              localizedTrack?.artist || detail?.preview?.artist;
+            if (this.hasHangul(localizedName)) {
+              item.name = localizedName;
+            }
+            if (this.hasHangul(localizedArtist)) {
+              item.subtitle = this.mergeSubtitleArtist(
+                item.subtitle,
+                localizedArtist,
+              );
+            }
+            return;
+          }
+          if (item.type === 'album') {
+            const localizedTitle = detail?.preview?.title;
+            const localizedArtist = detail?.preview?.artist;
+            if (this.hasHangul(localizedTitle)) {
+              item.name = localizedTitle;
+            }
+            if (this.hasHangul(localizedArtist)) {
+              item.subtitle = localizedArtist;
+            }
+          }
+        } catch (error) {
+          this.logger.debug(
+            `Spotify localized metadata failed: ${error.message}`,
+          );
+        }
+      }),
+    );
+  }
+
+  private mergeSubtitleArtist(
+    subtitle: string | undefined,
+    localizedArtist: string,
+  ): string {
+    if (!subtitle) {
+      return localizedArtist;
+    }
+    const parts = subtitle.split(' • ');
+    if (parts.length <= 1) {
+      return localizedArtist;
+    }
+    return [localizedArtist, ...parts.slice(1)].join(' • ');
+  }
+
+  private normalizeDuration(duration?: number): number | undefined {
+    if (!Number.isFinite(duration)) {
+      return undefined;
+    }
+    if (!duration) {
+      return undefined;
+    }
+    return duration < 1000 ? Math.round(duration * 1000) : Math.round(duration);
   }
 }

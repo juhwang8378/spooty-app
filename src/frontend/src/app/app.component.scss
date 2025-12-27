@@ -143,6 +143,19 @@
   flex-shrink: 0;
 }
 
+.search-result-action {
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-result-action[disabled] {
+  opacity: 0.55;
+}
+
 .instructions-body {
   padding: 0.5rem 0.25rem 0.25rem;
   color: #1f2937;
@@ -224,10 +237,10 @@
 
   .search-result-actions {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 
   .search-result-actions .button {
-    width: 100%;
+    width: auto;
   }
 }

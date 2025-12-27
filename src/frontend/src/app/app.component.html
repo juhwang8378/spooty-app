@@ -144,8 +144,21 @@
                 </div>
               </div>
               <div class="search-result-actions">
-                <button class="button is-small is-primary" (click)="downloadFromSearch(item)">
-                  <i class="fa-solid fa-download"></i> {{ i18n.t('downloadButton') }}
+                <button class="button is-small is-light search-result-action"
+                        type="button"
+                        (click)="togglePreview(item)"
+                        [disabled]="!hasPreview(item)"
+                        [attr.title]="previewTitle(item)"
+                        [attr.aria-label]="previewTitle(item)"
+                        [attr.aria-pressed]="isPreviewPlaying(item)">
+                  <i class="fa-solid" [class.fa-play]="!isPreviewPlaying(item)" [class.fa-pause]="isPreviewPlaying(item)"></i>
+                </button>
+                <button class="button is-small is-primary search-result-action"
+                        type="button"
+                        (click)="downloadFromSearch(item)"
+                        [attr.title]="i18n.t('downloadButton')"
+                        [attr.aria-label]="i18n.t('downloadButton')">
+                  <i class="fa-solid fa-download"></i>
                 </button>
               </div>
             </div>
@@ -163,8 +176,12 @@
                 </div>
               </div>
               <div class="search-result-actions">
-                <button class="button is-small is-primary" (click)="downloadFromSearch(item)">
-                  <i class="fa-solid fa-download"></i> {{ i18n.t('downloadButton') }}
+                <button class="button is-small is-primary search-result-action"
+                        type="button"
+                        (click)="downloadFromSearch(item)"
+                        [attr.title]="i18n.t('downloadButton')"
+                        [attr.aria-label]="i18n.t('downloadButton')">
+                  <i class="fa-solid fa-download"></i>
                 </button>
               </div>
             </div>

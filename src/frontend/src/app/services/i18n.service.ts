@@ -36,6 +36,9 @@ type TranslationMap = {
   searchTypeTrack: string;
   searchTypeAlbum: string;
   searchTypeArtist: string;
+  previewPlayTitle: string;
+  previewPauseTitle: string;
+  previewUnavailableTitle: string;
   playlistsTitle: string;
   playlistsRemoveCompletedTitle: string;
   playlistsRemoveFailedTitle: string;
@@ -104,6 +107,9 @@ export class I18nService {
       searchTypeTrack: 'Track',
       searchTypeAlbum: 'Album',
       searchTypeArtist: 'Artist',
+      previewPlayTitle: 'Play preview',
+      previewPauseTitle: 'Pause preview',
+      previewUnavailableTitle: 'Preview unavailable',
       playlistsTitle: 'Downloads',
       playlistsRemoveCompletedTitle: 'Remove completed from list',
       playlistsRemoveFailedTitle: 'Remove failed from list',
@@ -190,6 +196,9 @@ export class I18nService {
       searchTypeTrack: '곡',
       searchTypeAlbum: '앨범',
       searchTypeArtist: '아티스트',
+      previewPlayTitle: '미리보기 재생',
+      previewPauseTitle: '미리보기 일시정지',
+      previewUnavailableTitle: '미리보기 없음',
       playlistsTitle: '다운로드',
       playlistsRemoveCompletedTitle: '완료된 항목 목록에서 제거',
       playlistsRemoveFailedTitle: '실패한 항목 목록에서 제거',

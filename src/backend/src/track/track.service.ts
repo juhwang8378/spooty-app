@@ -91,6 +91,7 @@ export class TrackService {
       const youtubeUrl = await this.youtubeService.findOnYoutubeOne(
         track.artist,
         track.name,
+        track.durationMs,
       );
       updatedTrack = { ...track, youtubeUrl, status: TrackStatusEnum.Queued };
     } catch (err) {

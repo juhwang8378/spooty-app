@@ -7,6 +7,8 @@ export interface SearchResultItem {
   url: string;
   image?: string;
   subtitle?: string;
+  previewUrl?: string;
+  durationMs?: number;
 }
 
 export interface SearchResponse {
