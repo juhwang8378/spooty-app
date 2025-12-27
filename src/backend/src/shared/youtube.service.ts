@@ -145,7 +145,12 @@ export class YoutubeService {
       (video) => !this.isRejectedTitleOrDescription(video, name),
     );
     const eligible = filtered.length > 0 ? filtered : candidates;
-    const releaseCandidates = eligible.filter((video) =>
+    const artistMatched = eligible.filter((video) =>
+      this.hasArtistMatch(video, artist),
+    );
+    const artistMatchPool = artistMatched.length > 0 ? artistMatched : eligible;
+    const baseCandidates = artistMatchPool;
+    const releaseCandidates = baseCandidates.filter((video) =>
       this.isReleaseCandidate(video, artist),
     );
     const durationReleaseCandidates = durationMs
@@ -154,7 +159,7 @@ export class YoutubeService {
         )
       : [];
     const durationCandidates = durationMs
-      ? eligible.filter((video) => this.isDurationMatch(video, durationMs))
+      ? baseCandidates.filter((video) => this.isDurationMatch(video, durationMs))
       : [];
 
     const selectionPool =
@@ -164,7 +169,7 @@ export class YoutubeService {
         ? durationCandidates
         : releaseCandidates.length > 0
         ? releaseCandidates
-        : eligible;
+        : baseCandidates;
     const sorted = [...selectionPool].sort(
       (a, b) =>
         this.scoreVideo(b, artist, name, durationMs) -
@@ -274,6 +279,11 @@ export class YoutubeService {
     if (description.toLowerCase().includes('provided to youtube by')) {
       score += 2;
     }
+    if (this.hasArtistMatch(video, artist)) {
+      score += 3;
+    } else {
+      score -= 2;
+    }
     const durationDiffMs = this.getDurationDiffMs(video, durationMs);
     if (durationDiffMs !== undefined) {
       const diffPenalty = Math.min(4, durationDiffMs / 2500);
@@ -288,6 +298,63 @@ export class YoutubeService {
 
   private normalizeText(value: string): string {
     return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+
+  private hasArtistMatch(video: YoutubeCandidate, artist: string): boolean {
+    const tokens = this.getArtistTokens(artist);
+    if (tokens.length === 0) {
+      return false;
+    }
+    const combined = `${video?.title ?? ''} ${video?.description ?? ''} ${
+      video?.channel ?? ''
+    } ${video?.uploader ?? ''}`.trim();
+    if (!combined) {
+      return false;
+    }
+    const normalizedCombined = this.normalizeText(combined);
+    return tokens.some((token) =>
+      this.matchesToken(combined, normalizedCombined, token),
+    );
+  }
+
+  private getArtistTokens(artist: string): string[] {
+    const raw = artist?.trim();
+    if (!raw) {
+      return [];
+    }
+    const tokens = new Set<string>();
+    tokens.add(raw);
+    const splitTokens = raw
+      .split(/,|&| feat\.?| ft\.?| with | x |\/|•|·/gi)
+      .map((token) => token.trim())
+      .filter(Boolean);
+    for (const token of splitTokens) {
+      tokens.add(token);
+    }
+    const hangulMatches = raw.match(/[\uac00-\ud7a3]+/g) ?? [];
+    for (const token of hangulMatches) {
+      tokens.add(token);
+    }
+    return [...tokens].filter((token) => token.length > 1);
+  }
+
+  private matchesToken(
+    combined: string,
+    normalizedCombined: string,
+    token: string,
+  ): boolean {
+    if (this.hasHangul(token)) {
+      return combined.includes(token);
+    }
+    const normalizedToken = this.normalizeText(token);
+    if (!normalizedToken) {
+      return false;
+    }
+    return normalizedCombined.includes(normalizedToken);
+  }
+
+  private hasHangul(value: string): boolean {
+    return /[\uac00-\ud7a3]/.test(value);
   }
 
   private trackNameHasVersionTerm(name: string): boolean {
